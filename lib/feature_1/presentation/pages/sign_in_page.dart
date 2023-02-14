@@ -38,7 +38,9 @@ class _SignInPageState extends State<SignInPage> {
             return BlocBuilder<AuthCubit, AuthState>(
                 builder: (context, authState) {
               if (authState is Authenticated) {
-                return const HomePage();
+                return HomePage(
+                  uid: authState.uid,
+                );
               } else {
                 return _bodyWidget();
               }
@@ -72,7 +74,7 @@ class _SignInPageState extends State<SignInPage> {
           const SizedBox(height: 30),
           SizedBox(
             height: 120,
-            child: Image.asset("asset/notebook.png"),
+            child: Image.asset("assets/notebook.png"),
           ),
           const SizedBox(height: 40),
           Container(

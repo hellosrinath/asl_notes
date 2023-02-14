@@ -1,5 +1,12 @@
 import 'package:asl_notes/app_constant.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../domain/entities/user_entity.dart';
+import '../cubit/auth/auth_cubit.dart';
+import '../cubit/user/user_cubit.dart';
+import '../widgets/common.dart';
+import 'home_page.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -27,7 +34,36 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _globalKey,
-      body: _bodyWidget(),
+      body: BlocConsumer<UserCubit, UserState>(
+        builder: (context, userState) {
+          if (userState is UserSuccess) {
+            return BlocBuilder<AuthCubit, AuthState>(
+                builder: (context, authState) {
+              if (authState is Authenticated) {
+                return HomePage(
+                  uid: authState.uid,
+                );
+              } else {
+                return _bodyWidget();
+              }
+            });
+          }
+
+          return _bodyWidget();
+        },
+        listener: (context, userState) {
+          if (userState is UserSuccess) {
+            BlocProvider.of<AuthCubit>(context).loggedIn();
+          }
+          if (userState is UserFailure) {
+            snackBarError(
+              msg: "invalid email",
+              scaffoldState: _globalKey,
+              context: context,
+            );
+          }
+        },
+      ),
     );
   }
 
@@ -106,7 +142,7 @@ class _SignUpPageState extends State<SignUpPage> {
           const SizedBox(height: 15),
           GestureDetector(
             onTap: () {
-              submitSignIn();
+              submitSignUp();
             },
             child: Container(
               height: 45,
@@ -130,5 +166,18 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  void submitSignIn() {}
+  void submitSignUp() {
+    if (_usernameController.text.isNotEmpty &&
+        _emailController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty) {
+      BlocProvider.of<UserCubit>(context).submitSignUp(
+        user: UserEntity(
+          name: _usernameController.text,
+          email: _emailController.text,
+          status: "Hey, I m using this app",
+          password: _passwordController.text,
+        ),
+      );
+    }
+  }
 }

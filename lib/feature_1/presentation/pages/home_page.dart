@@ -1,11 +1,17 @@
 import 'package:asl_notes/app_constant.dart';
+import 'package:asl_notes/feature_1/presentation/cubit/auth/auth_cubit.dart';
 import 'package:asl_notes/feature_1/presentation/cubit/note/note_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  final String uid;
+
+  const HomePage({
+    Key? key,
+    required this.uid,
+  }) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -13,8 +19,38 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   @override
+  void initState() {
+    BlocProvider.of<NoteCubit>(context).getNotes(uid: widget.uid);
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "My Notes",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              BlocProvider.of<AuthCubit>(context).loggedOut();
+            },
+            icon:const Icon(Icons.exit_to_app),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, PageConst.addNotePage,
+              arguments: widget.uid);
+        },
+        child: const Icon(Icons.add),
+      ),
       body: BlocBuilder<NoteCubit, NoteState>(
         builder: (context, noteState) {
           if (noteState is NoteLoaded) {
@@ -31,9 +67,11 @@ class _HomePageState extends State<HomePage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        SizedBox(
-          height: 80,
-          child: Image.asset("assets/notebook.png"),
+        Center(
+          child: SizedBox(
+            height: 80,
+            child: Image.asset("assets/notebook.png"),
+          ),
         ),
         const SizedBox(height: 10),
         const Text("No notes here yet"),
@@ -116,7 +154,7 @@ class _HomePageState extends State<HomePage> {
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 4),
-                            Text(DateFormat("dd MMM YYY hh:mm a").format(
+                            Text(DateFormat("dd MMM yyy hh:mm a").format(
                                 noteLoadedState.notes[index].time!.toDate())),
                           ],
                         ),

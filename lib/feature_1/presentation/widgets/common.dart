@@ -19,14 +19,19 @@ void snackBarError({
       ),
     ),
   );*/
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      backgroundColor: Colors.red,
-      duration: const Duration(seconds: 3),
-      content: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [Text("$msg"), const Icon(FontAwesome.exclamation_triangle)],
+  if (scaffoldState!.currentState != null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("$msg"),
+            const Icon(FontAwesome.exclamation_triangle)
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
